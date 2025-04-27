@@ -20,7 +20,7 @@ if (isset($_POST['create'])) {
     $middlename   = $_POST['Mname'];
     $nameext      = $_POST['Ename'];
     $phonenumber  = $_POST['pnumber'];
-    $email        = $_POST['eadrress'];  // keep this as you said
+    $email        = $_POST['eadrress']; 
     $street       = $_POST['street'];
     $barangay     = $_POST['barangay'];
     $password     = $_POST['password'];
@@ -29,6 +29,10 @@ if (isset($_POST['create'])) {
     $landmark     = $_POST['landmark'] ?? '';
     $shopname     = $_POST['shopname'];
     $shoptype     = $_POST['shoptype'];
+    $latitude = $_POST['latitude'] ?? '';
+    $longitude = $_POST['longitude'] ?? '';
+
+
 
     $hasError = false;
 
@@ -88,12 +92,12 @@ if (isset($_POST['create'])) {
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         $sql = "INSERT INTO seller (
-            Seller_Username, FirstName, MiddleName, LastName, NameExt, PhoneNumber, Email, Street, HouseNo, Barangay, Password, ShopName, ShopType, Landmark, SellerPicture, SellerLogo, Requirement, Status, Customization
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            Seller_Username, FirstName, MiddleName, LastName, NameExt, PhoneNumber, Email, Street, HouseNo, Barangay, latitude, longitude,Password, ShopName, ShopType, Landmark, SellerPicture, SellerLogo, Requirement, Status, Customization
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $db->prepare($sql);
         $result = $stmt->execute([
-            $username, $firstname, $middlename, $lastname, $nameext, $phonenumber, $email, $street, $housenumber, $barangay,
+            $username, $firstname, $middlename, $lastname, $nameext, $phonenumber, $email, $street, $housenumber, $barangay, $latitude, $longitude,
             $hashedPassword, $shopname, $shoptype, $landmark, $picPath, $logoPath, $certPath, 
             'Pending',  // Status default (optional, based on your logic)
             'No'        // Customization default (optional)
@@ -122,6 +126,20 @@ if (isset($_POST['create'])) {
     <link rel="shortcut icon" type="image/x-icon" href="/itcc1023/midterms/img/logo.png" />
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>Seller Sign-Up</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        #locationResult {
+            padding: 10px;
+            background-color: #f0f8ff;
+            border: 1px solid #007bff;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
@@ -159,6 +177,9 @@ if (isset($_POST['create'])) {
             <option value="b4">Barangay 4</option>
         </select>
         <input type="text" name="landmark" class="data" placeholder="Landmark">
+    </div>
+    <div class="first">
+    <div id="map"></div>
     </div>
     
 
@@ -206,6 +227,8 @@ if (isset($_POST['create'])) {
         <img src="" alt="" class="input-image" id="certPreview" onclick="document.getElementById('certUpload').click()" style="cursor:pointer;">
         <input type="file" name="certUpload" id="certUpload" accept="image/*" style="display:none;" onchange="previewImage(event, 'certPreview')" required>
     </div>
+    <input type="hidden" name="latitude" id="latitude">
+    <input type="hidden" name="longitude" id="longitude">
 
     <div class="first">
         <button type="submit" name="create" class="submit">Sign-Up</button>
@@ -230,5 +253,72 @@ function previewImage(event, previewId) {
     }
 }
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDsyCZpAJ4FEq6CxKn97q8oNdhyUsUxvFc&callback=initMap" async defer></script>
+        
+        <script>
+        var map, marker, geocoder;
+        
+        
+        function initMap() {
+            var defaultLocation = { lat: 14.678886402185922, lng: 120.54064149611898 }; 
+            
+        
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: defaultLocation,
+                zoom: 13
+            });
+        
+            geocoder = new google.maps.Geocoder();
+        
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+                draggable: true
+            });
+        
+            updateLocation(marker.getPosition());
+        
+            marker.addListener('dragend', function() {
+                updateLocation(marker.getPosition());
+            });
+        
+            map.addListener('click', function(event) {
+                marker.setPosition(event.latLng);
+                updateLocation(event.latLng);
+            });
+        
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    map.setCenter(userLocation);
+                    marker.setPosition(userLocation);
+                    updateLocation(marker.getPosition());
+                }, function() {
+                    alert('Error: Location service failed or blocked.');
+                });
+            } else {
+                alert('Error: Your browser does not support geolocation.');
+            }
+        }
+        
+        // Update lat/lng and address
+        function updateLocation(latLng) {
+            document.getElementById('latitude').value = latLng.lat();
+            document.getElementById('longitude').value = latLng.lng();
+        
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('signupForm').addEventListener('submit', function(event) {
+        
+                var latitude = document.getElementById('latitude').value;
+                var longitude = document.getElementById('longitude').value;
+            });
+        });
+        </script>
+    
 </body>
 </html>
