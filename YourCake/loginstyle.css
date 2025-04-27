@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+    font-family: 'Poppins', sans-serif;
+}
+
+:root{
+    --cream: #edebdf;
+    --light-brown: #a4978e;
+    --dark-brown: #766e6b;
+    --dark-pink: #d7b4b0;
+    --light-pink: #e0bfac;
+    --body-color: rgb(255, 253, 253);
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+.container{
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    
+    justify-content: center;
+    align-items: center;
+}
+
+.image img{
+    min-width: 70%;
+    width: 100%;
+}
+
+.form-container, .logo-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    
+    height: 100vh;
+}
+
+.form-container{
+    
+    width: 35%;
+}
+
+.logo-container{
+    
+    width: 40%;
+    height: 100vh;
+    float:left;
+}
+
+.error{
+    color: var(--dark-pink);
+    margin: 0;
+    font-size: 1rem;
+}
+
+h1 {
+    font-size: 90px;
+    margin:0;
+    text-align: center;
+}
+
+input,
+button{
+    
+    border: none;
+    outline: none;
+}
+
+.input-container{
+    display: flex;
+    margin-top: 10px ;
+    width: 55%;
+    position: relative;
+    align-items: center;
+    background-color: var(--dark-brown);
+    border-radius: 1rem;
+    color: var(--cream);
+}
+
+.icon{
+margin-left: 10px;
+}
+
+input{
+    
+    background: none;
+    width: 100%;
+    padding: 1rem 2rem 1rem 1rem;
+    height: 5px;
+    font-weight: var(--font-semi-bold);
+    border: 3px solid transparent;
+    border-radius: 1rem;
+    color: white;
+}
+
+::placeholder{
+    color: white;
+}
+
+.forgot-password {
+    align-self: flex-start;
+    margin: 10px 0 10px 25%;
+    font-size: 14px;
+    text-decoration: none;
+    color: #b88;
+}
+.login-btn {
+    
+    background: var(--light-pink);
+    border: none;
+    padding: 10px;
+    width: 55%;
+    border-radius: 10px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+}
+
+.login-btn:hover{
+    background-color: var(--dark-pink);
+}
+
+.links {
+    margin:20px 0 10px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.links a {
+    text-decoration: none;
+    color: var(--dark-pink);
+}
