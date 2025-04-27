@@ -2,8 +2,10 @@
 session_start();
 if (!empty($_SESSION['name'])) {
     header('location:Admin.php');
+    exit;
 } else if (!empty($_SESSION['cusname'])) {
     header('location:HomePage.php');
+    exit;
 }
 
 require_once('config.php');
@@ -18,34 +20,34 @@ if (isset($_POST['create'])) {
     $middlename   = $_POST['Mname'];
     $nameext      = $_POST['Ename'];
     $phonenumber  = $_POST['pnumber'];
-    $email        = $_POST['eadrress'];
+    $email        = $_POST['eadrress'];  // keep this as you said
     $street       = $_POST['street'];
     $barangay     = $_POST['barangay'];
     $password     = $_POST['password'];
     $cpassword    = $_POST['cpassword'];
     $housenumber  = $_POST['housenumber'] ?? '';
     $landmark     = $_POST['landmark'] ?? '';
-    $shopname = $_POST['shopname'];
-    $shoptype = $_POST['shoptype'];
-
+    $shopname     = $_POST['shopname'];
+    $shoptype     = $_POST['shoptype'];
 
     $hasError = false;
 
-    $checkUser = $db->prepare("SELECT * FROM sellertable WHERE Seller_Username = ?");
+    // Duplicate checking
+    $checkUser = $db->prepare("SELECT * FROM seller WHERE Seller_Username = ?");
     $checkUser->execute([$username]);
     if ($checkUser->rowCount() > 0) {
         $usernameErr = "Username already exists.";
         $hasError = true;
     }
 
-    $checkPhone = $db->prepare("SELECT * FROM sellertable WHERE PhoneNumber = ?");
+    $checkPhone = $db->prepare("SELECT * FROM seller WHERE PhoneNumber = ?");
     $checkPhone->execute([$phonenumber]);
     if ($checkPhone->rowCount() > 0) {
         $phoneErr = "Phone number already registered.";
         $hasError = true;
     }
 
-    $checkEmail = $db->prepare("SELECT * FROM sellertable WHERE Email = ?");
+    $checkEmail = $db->prepare("SELECT * FROM seller WHERE Email = ?");
     $checkEmail->execute([$email]);
     if ($checkEmail->rowCount() > 0) {
         $emailErr = "Email already registered.";
@@ -57,11 +59,11 @@ if (isset($_POST['create'])) {
         $hasError = true;
     }
 
-
-    $idPath = $picPath = $logoPath = '';
+    $idPath = $picPath = $logoPath = $certPath = '';
     $uploadDir = 'uploads/';
 
     if (!$hasError) {
+        // Uploading Files
         if (!empty($_FILES['idUpload']['name'])) {
             $idPath = $uploadDir . basename($_FILES['idUpload']['name']);
             move_uploaded_file($_FILES['idUpload']['tmp_name'], $idPath);
@@ -77,12 +79,25 @@ if (isset($_POST['create'])) {
             move_uploaded_file($_FILES['logoUpload']['tmp_name'], $logoPath);
         }
 
-        $sql = "INSERT INTO sellertable (
-            Seller_Username, FirstName, MiddleName, LastName, NameExt, PhoneNumber, Email, Street, HouseNo, Barangay, Password, ShopName, ShopType, Landmark, SellerPicture, SellerLogo, ValidID)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
+        if (!empty($_FILES['certUpload']['name'])) {
+            $certPath = $uploadDir . basename($_FILES['certUpload']['name']);
+            move_uploaded_file($_FILES['certUpload']['tmp_name'], $certPath);
+        }
+
+        // Password hashing
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $sql = "INSERT INTO seller (
+            Seller_Username, FirstName, MiddleName, LastName, NameExt, PhoneNumber, Email, Street, HouseNo, Barangay, Password, ShopName, ShopType, Landmark, SellerPicture, SellerLogo, Requirement, Status, Customization
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         $stmt = $db->prepare($sql);
-        $result = $stmt->execute([$username, $firstname, $middlename, $lastname, $nameext,$phonenumber, $email, $street, $housenumber, $barangay,$password, $shopname, $shoptype, $landmark,$picPath, $logoPath,$idPath ]);
+        $result = $stmt->execute([
+            $username, $firstname, $middlename, $lastname, $nameext, $phonenumber, $email, $street, $housenumber, $barangay,
+            $hashedPassword, $shopname, $shoptype, $landmark, $picPath, $logoPath, $certPath, 
+            'Pending',  // Status default (optional, based on your logic)
+            'No'        // Customization default (optional)
+        ]);
 
         if ($result) {
             echo '<script>
